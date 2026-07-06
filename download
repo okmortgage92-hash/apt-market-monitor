@@ -280,7 +280,7 @@ function Report({ d }) {
 
       {error && (
         <div style={{ marginTop:14, background:C.warnBg, border:"1px solid #F0C9CE", borderRadius:14, padding:"18px 20px", color:C.warnFg, fontSize:13 }}>
-          리포트를 생성하지 못했어요. Vercel 환경변수 <b>ANTHROPIC_API_KEY</b>가 설정됐는지 확인해 주세요.<br/>
+          리포트를 생성하지 못했어요. Vercel 환경변수 <b>GEMINI_API_KEY</b>가 설정됐는지 확인해 주세요.<br/>
           <span style={{ fontSize:11, opacity:0.8 }}>상세: {error}</span>
         </div>
       )}
