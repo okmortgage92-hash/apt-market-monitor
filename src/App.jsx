@@ -54,7 +54,7 @@ export default function App() {
   }, []);
 
   const { loading, error, d } = state;
-  const tabs = ["개요", "지역 분석", "리스크 모니터"];
+  const tabs = ["개요", "지역 분석", "리스크 모니터", "AI 리포트"];
 
   return (
     <div style={{ fontFamily: font, background: C.paper, color: C.ink, minHeight: "100vh", padding: 20 }}>
@@ -86,6 +86,7 @@ export default function App() {
             {tab==="개요" && <Overview d={d} />}
             {tab==="지역 분석" && <Regional d={d} />}
             {tab==="리스크 모니터" && <RiskMonitor d={d} />}
+            {tab==="AI 리포트" && <Report d={d} />}
 
             <div style={{ fontSize:11, color:C.faint, marginTop:14, lineHeight:1.6 }}>
               집계기준: 한국부동산원 부동산거래현황(기집계) — 국토부 실거래가 공개시스템과 집계기준 상이.
@@ -232,6 +233,97 @@ function RiskMonitor({ d }) {
     </>
   );
 }
+
+function Report({ d }) {
+  const [state, setState] = useState({ loading: false, sections: null, error: null });
+
+  const generate = () => {
+    setState({ loading: true, sections: null, error: null });
+    fetch("/api/report", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(d),
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.error) setState({ loading: false, sections: null, error: res.error });
+        else setState({ loading: false, sections: res.sections, error: null });
+      })
+      .catch((e) => setState({ loading: false, sections: null, error: String(e) }));
+  };
+
+  const { loading, sections, error } = state;
+
+  return (
+    <>
+      <Card>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10 }}>
+          <div>
+            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+              <span style={{ fontSize:11, fontWeight:800, letterSpacing:"0.08em", color:C.brand, background:"#E8EEF6", padding:"3px 8px", borderRadius:6 }}>AI 시장 리포트</span>
+              <span style={{ fontSize:15, fontWeight:700 }}>{d.latestMonth} 부동산 시장 보고서</span>
+            </div>
+            <div style={{ fontSize:11.5, color:C.faint, marginTop:6 }}>
+              수치는 코드가 계산한 확정값을 인용 · AI는 서술만 담당 (숫자 생성 안 함)
+            </div>
+          </div>
+          <div style={{ display:"flex", gap:8 }}>
+            {sections && <button onClick={() => window.print()} style={btnGhost}>인쇄 / PDF</button>}
+            <button onClick={generate} disabled={loading} style={btnPrimary(loading)}>
+              {loading ? "생성 중…" : sections ? "다시 생성" : "리포트 생성"}
+            </button>
+          </div>
+        </div>
+      </Card>
+
+      {loading && <div style={{ marginTop:14 }}><Splash text="AI가 최신 지표로 보고서를 작성하는 중…" /></div>}
+
+      {error && (
+        <div style={{ marginTop:14, background:C.warnBg, border:"1px solid #F0C9CE", borderRadius:14, padding:"18px 20px", color:C.warnFg, fontSize:13 }}>
+          리포트를 생성하지 못했어요. Vercel 환경변수 <b>GEMINI_API_KEY</b>가 설정됐는지 확인해 주세요.<br/>
+          <span style={{ fontSize:11, opacity:0.8 }}>상세: {error}</span>
+        </div>
+      )}
+
+      {sections && (
+        <div style={{ marginTop:14 }}>
+          <Card>
+            <div style={{ borderBottom:`2px solid ${C.brand}`, paddingBottom:12, marginBottom:16 }}>
+              <div style={{ fontSize:12, color:C.brand, fontWeight:700, letterSpacing:"0.06em" }}>APARTMENT MARKET REPORT</div>
+              <h2 style={{ fontSize:20, fontWeight:800, margin:"4px 0 0" }}>{d.latestMonth} 아파트 시장 분석 보고서</h2>
+              <div style={{ fontSize:11.5, color:C.faint, marginTop:4 }}>출처: 한국부동산원 R-ONE · 작성 보조: Claude</div>
+            </div>
+            {sections.map((s, i) => (
+              <div key={i} style={{ marginBottom:18 }}>
+                <h3 style={{ fontSize:14.5, fontWeight:700, margin:"0 0 7px", color:C.brand }}>{i + 1}. {s.heading}</h3>
+                <p style={{ fontSize:13.5, lineHeight:1.8, margin:0, color:C.ink, whiteSpace:"pre-wrap" }}>{s.body}</p>
+              </div>
+            ))}
+            <div style={{ fontSize:11, color:C.faint, marginTop:8, borderTop:`1px solid ${C.line}`, paddingTop:10, lineHeight:1.6 }}>
+              본 보고서의 수치는 부동산원 공표 확정값이며, 서술은 AI 보조로 작성됨. 시장 모니터링 목적이며 개별 여신 판단을 대체하지 않습니다.
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {!sections && !loading && !error && (
+        <div style={{ marginTop:14, textAlign:"center", fontSize:13, color:C.faint, padding:"30px 0" }}>
+          위 <b>리포트 생성</b> 버튼을 누르면 {d.latestMonth} 지표로 4개 섹션 보고서를 만들어요.<br/>
+          <span style={{ fontSize:11.5 }}>시장 요약 · 지역별 동향 · 리스크 진단 · 종합 의견</span>
+        </div>
+      )}
+    </>
+  );
+}
+
+const btnPrimary = (loading) => ({
+  fontSize:12.5, fontWeight:700, padding:"8px 16px", borderRadius:9, cursor: loading ? "default" : "pointer",
+  border:"none", background: loading ? "#9AA9BE" : "#1F3A5F", color:"#fff",
+});
+const btnGhost = {
+  fontSize:12.5, fontWeight:600, padding:"8px 14px", borderRadius:9, cursor:"pointer",
+  border:"1px solid #E6E8EE", background:"#fff", color:"#5B6472",
+};
 
 function Splash({ text }) {
   return (
