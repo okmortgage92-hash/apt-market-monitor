@@ -1,106 +1,12 @@
-# 아파트 시장 모니터링 대시보드
-
-한국부동산원 실거래가격지수 · 행정구역별 거래현황을 보여주는 시장 모니터링 대시보드입니다.
-(현재는 목업 데이터로 화면만 동작하는 프로토타입)
-
----
-
-## 처음이신가요? 여기부터 읽으세요
-
-이 폴더는 "웹사이트 한 채"를 짓는 재료들이 들어 있는 상자입니다.
-직접 컴퓨터에 뭘 설치하지 않고도 **인터넷에 올리는 방법**부터 안내합니다.
-
-준비물: GitHub 계정 (무료), 인터넷 브라우저. 그게 전부입니다.
-
----
-
-## 방법 1 — 설치 없이 올리고 띄우기 (추천)
-
-터미널/명령어 없이, 마우스 클릭만으로 진행합니다.
-
-### 1단계. GitHub에 코드 올리기
-1. https://github.com 접속 → 계정 만들기 (이미 있으면 로그인)
-2. 오른쪽 위 `+` → **New repository** 클릭
-3. Repository name 에 `apt-market-monitor` 입력 → **Create repository**
-4. 새로 만든 저장소 화면에서 **uploading an existing file** 링크 클릭
-5. 이 폴더 안의 파일들을 **통째로 드래그**해서 올립니다
-   - 올릴 것: `index.html`, `package.json`, `vite.config.js`, `.gitignore`, 그리고 `src` 폴더
-   - 올리지 않아도 되는 것: 없음 (node_modules 같은 건 원래 이 상자에 없습니다)
-6. 아래 **Commit changes** 클릭 → 끝. 코드가 GitHub에 저장됐습니다.
-
-### 2단계. 인터넷 주소로 띄우기 (Vercel)
-1. https://vercel.com 접속 → **Continue with GitHub** 로 로그인
-2. **Add New… → Project** 클릭
-3. 방금 만든 `apt-market-monitor` 저장소 선택 → **Import**
-4. 설정은 건드릴 것 없이 **Deploy** 클릭
-5. 1~2분 기다리면 `https://apt-market-monitor-xxxx.vercel.app` 같은
-   **실제 주소**가 나옵니다. 그 주소로 누구나 대시보드를 볼 수 있어요.
-
-> 코드를 GitHub에서 고치면 Vercel이 자동으로 다시 띄워줍니다. (설치 0번)
-
----
-
-## 방법 2 — 내 컴퓨터에서 직접 개발하기 (나중에 코드 수정할 때)
-
-실데이터 연동 등 본격적으로 손볼 때 쓰는 정식 방법입니다.
-
-1. **Node.js 설치**: https://nodejs.org 에서 LTS 버전 다운로드 → 설치
-2. 이 폴더를 컴퓨터에 둔 뒤, 그 폴더에서 터미널(명령 프롬프트)을 엽니다
-3. 아래 3줄을 순서대로 입력:
-
-   ```
-   npm install      ← 필요한 재료 자동 다운로드 (처음 1번만)
-   npm run dev      ← 개발용 미리보기 실행
-   ```
-
-4. 화면에 뜨는 `http://localhost:5173` 주소를 브라우저에서 열면 대시보드가 보입니다
-5. `src/App.jsx` 파일을 수정하면 화면이 바로 바뀝니다
-
----
-
-## 폴더 안에 뭐가 들었나
-
-| 파일 | 역할 |
-|------|------|
-| `src/App.jsx` | **대시보드 본체.** 화면·차트·데이터가 여기 있음 (주로 여기를 수정) |
-| `src/main.jsx` | App을 화면에 띄우는 시작점 (건드릴 일 거의 없음) |
-| `index.html` | 웹페이지 뼈대 |
-| `package.json` | 어떤 재료(라이브러리)를 쓰는지 목록 |
-| `vite.config.js` | 빌드 도구 설정 |
-| `.gitignore` | GitHub에 안 올릴 파일 목록 |
-
----
-
-## 실데이터 연동 (이미 코드 완료 — 인증키만 넣으면 됨)
-
-이 프로젝트는 한국부동산원 R-ONE Open API에 연결되도록 코드가 짜여 있습니다.
-
-- `api/reb.js` = 심부름꾼. 인증키를 숨긴 채 부동산원에 대신 물어보고,
-  최신 공표월을 자동으로 찾아 시도별로 정리해 돌려줍니다.
-- `src/App.jsx` = 그 심부름꾼에서 받은 진짜 데이터를 화면에 표시.
-
-연결되는 통계표:
-- (월) 지역별 매매지수_아파트 — `A_2024_00178`
-- (월) 행정구역별 아파트매매거래현황 — `A_2024_00554`
-
-### 인증키 넣는 법 (Vercel 환경변수)
-
-인증키는 코드에 적지 않고 Vercel에 **비밀로** 저장합니다.
-
-1. vercel.com → 해당 프로젝트 → **Settings** 탭
-2. 왼쪽 **Environment Variables** 클릭
-3. 입력:
-   - Name(이름): `REB_KEY`
-   - Value(값): R-ONE에서 발급받은 본인 인증키
-4. **Save**
-5. 위쪽 **Deployments** 탭 → 맨 위 배포의 점 3개(⋯) → **Redeploy**
-   (환경변수는 다시 배포해야 적용됩니다)
-
-이러면 끝. 대시보드가 매번 부동산원의 최신 공표 자료를 자동으로 받아옵니다.
-
-> ⚠️ 인증키는 비밀번호입니다. 코드·README·캡처 어디에도 적지 마세요.
-> Vercel 환경변수에만 넣으면 외부에 노출되지 않습니다.
-
-### 아직 샘플인 부분
-- 지역 분석 탭의 **시·군·구 분기 지수**는 아직 샘플입니다.
-  추후 (분기) 시군구별 매매지수_아파트 코드를 `api/reb.js`에 추가해 연동 예정.
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>아파트 시장 모니터링</title>
+  </head>
+  <body style="margin:0">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
