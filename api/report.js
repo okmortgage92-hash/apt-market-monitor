@@ -5,7 +5,7 @@
 // 숫자 계산·판정은 절대 AI가 하지 않음. API 키는 환경변수 GEMINI_API_KEY 에 숨김.
 // ───────────────────────────────────────────────────────────────
 
-const MODEL = "gemini-2.0-flash"; // 무료 등급 모델. 최신 모델명은 ai.google.dev 참고해 교체 가능
+const MODEL = "gemini-flash-latest"; // 무료 등급 모델. 최신 모델명은 ai.google.dev 참고해 교체 가능
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST만 허용" });
