@@ -61,8 +61,7 @@ export default function App() {
       <div style={{ maxWidth: 1080, margin: "0 auto" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end", flexWrap:"wrap", gap:12, marginBottom:14 }}>
           <div>
-            <div style={{ fontSize:12, letterSpacing:"0.14em", color:C.brand, fontWeight:700, marginBottom:4 }}>APARTMENT MARKET MONITOR</div>
-            <h1 style={{ fontSize:25, fontWeight:800, margin:0, letterSpacing:"-0.02em" }}>아파트 시장 모니터링</h1>
+<h1 style={{ fontSize:25, fontWeight:800, margin:0, letterSpacing:"-0.02em" }}>OK모기지사업본부 주택시장 거래지표 분석</h1>
           </div>
           <div style={{ textAlign:"right", fontSize:12, color:C.sub, lineHeight:1.7 }}>
             <div><b style={{ color:C.ink }}>한국부동산원</b> R-ONE 실시간 연동</div>
