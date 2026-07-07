@@ -5,7 +5,7 @@
 // 숫자 계산·판정은 절대 AI가 하지 않음. API 키는 환경변수 GEMINI_API_KEY 에 숨김.
 // ───────────────────────────────────────────────────────────────
 
-const MODEL = "gemini-flash-latest"; // 무료 등급 모델. 최신 모델명은 ai.google.dev 참고해 교체 가능
+const MODEL = "gemini-2.0-flash"; // 무료 등급 모델. 최신 모델명은 ai.google.dev 참고해 교체 가능
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST만 허용" });
@@ -62,7 +62,7 @@ ${JSON.stringify(facts, null, 2)}
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.4, maxOutputTokens: 1500 },
+        generationConfig: { temperature: 0.4, maxOutputTokens: 4000 },
       }),
     });
 
@@ -71,13 +71,29 @@ ${JSON.stringify(facts, null, 2)}
 
     const text = (data.candidates?.[0]?.content?.parts || [])
       .map((p) => p.text || "").join("").trim();
-    const clean = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
-    let sections;
-    try {
-      sections = JSON.parse(clean);
-    } catch {
-      sections = [{ heading: "AI 시장 리포트", body: clean }];
+    // 응답에서 JSON 배열만 뽑아내기 (앞뒤 설명·백틱 제거)
+    let sections = null;
+    const start = text.indexOf("[");
+    const end = text.lastIndexOf("]");
+    if (start !== -1 && end !== -1 && end > start) {
+      const jsonStr = text.slice(start, end + 1);
+      try {
+        sections = JSON.parse(jsonStr);
+      } catch {
+        sections = null;
+      }
+    }
+
+    // 그래도 안 되면, heading/body를 정규식으로 최대한 살려내기
+    if (!Array.isArray(sections) || sections.length === 0) {
+      const items = [];
+      const re = /"heading"\s*:\s*"([^"]*)"\s*,\s*"body"\s*:\s*"([\s\S]*?)"\s*}/g;
+      let m;
+      while ((m = re.exec(text)) !== null) {
+        items.push({ heading: m[1], body: m[2].replace(/\\n/g, " ").replace(/\\"/g, '"') });
+      }
+      sections = items.length > 0 ? items : [{ heading: "AI 시장 리포트", body: text }];
     }
 
     res.status(200).json({ latestMonth: d.latestMonth, sections });
